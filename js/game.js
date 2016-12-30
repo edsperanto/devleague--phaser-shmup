@@ -1,3 +1,5 @@
+// Phaser slides: http://slides.com/devleague/phaser-1/
+
 (Phaser => {
  	const GAME_WIDTH = 460;
  	const GAME_HEIGHT = 600;
@@ -7,20 +9,25 @@
  	const PLAYER_BULLET_SPEED = 6;
  	const ENEMY_SPAWN_FREQ = 100;
  	const ENEMY_SPEED = 4.5;
+ 	const ENEMY_FIRE_FREQ = 20;
+ 	const ENEMY_BULLET_ACCEL = 100;
 
  	let player;
  	let enemies;
  	let cursors;
+ 	let enemyBullets;
 
  	const preload = _ => {
  		game.load.spritesheet(GFX, 'assets/shmup-spritesheet-140x56-28x28-tile.png', 28, 28);
- 	};
+ 	}
 
  	const handlePlayerFire = _ => {
  		playerBullets.add( game.add.sprite(player.x, player.y, GFX, 7));
  	}
 
  	const create = _ => {
+ 		game.physics.startSystem(Phaser.Physics.ARCADE);
+
  		cursors = game.input.keyboard.createCursorKeys();
  		cursors.fire = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
  		cursors.fire.onUp.add( handlePlayerFire );
@@ -29,7 +36,9 @@
  		player.moveSpeed = INITIAL_MOVESPEED;
  		playerBullets = game.add.group();
  		enemies = game.add.group();
- 	};
+ 		enemyBullets = game.add.group();
+ 		enemyBullets.enableBody = true;
+ 	}
 
  	const handlePlayerMovement = _ => {
  		let movingH = Math.sqrt(2);
@@ -60,6 +69,9 @@
 
  	const handleBulletAnimations = _ => {
  		playerBullets.children.forEach( bullet => bullet.y -= PLAYER_BULLET_SPEED );
+ 		enemyBullets.children.forEach( bullet => {
+ 			game.physics.arcade.accelerateToObject(bullet, player, ENEMY_BULLET_ACCEL);
+ 		});
  	}
 
  	const randomlySpawnEnemy = _ => {
@@ -69,9 +81,19 @@
  		}
  	}
 
+ 	const randomEnemyFire = enemy => {
+		if( Math.floor(Math.random() * ENEMY_FIRE_FREQ) === 0 ){
+			let enemyBullet = game.add.sprite(enemy.x, enemy.y, GFX, 9);
+			enemyBullet.checkWorldBounds = true;
+			enemyBullet.outOfBoundsKill = true;
+			enemyBullets.add( enemyBullet );
+		}
+	}
+
  	const handleEnemyActions = _ => {
 		enemies.children.forEach( enemy => enemy.y += ENEMY_SPEED );
-	};
+		enemies.children.forEach( enemy => randomEnemyFire(enemy) )
+	}
 
 	const removeBullet = bullet => bullet.destroy();
 
@@ -111,7 +133,15 @@
 				handlePlayerHit();
 			enemiesHit.forEach( destroyEnemy );
 		}
-	};
+
+		// check if enemy bullets hit the player
+		let enemyBulletsLanded = enemyBullets.children
+			.filter( bullet => bullet.overlap(player) );
+		if( enemyBulletsLanded.length > 0 ){
+			handlePlayerHit(); // count as one hit
+			enemyBulletsLanded.forEach( removeBullet );
+		}
+	}
 
  	const cleanup = _ => {
  		playerBullets.children
@@ -127,7 +157,7 @@
  		handleEnemyActions();
 
  		cleanup();
- 	};
+ 	}
 
  	//															v---- WebGL (better) or Canvas (fallback)
  	const game = new Phaser.Game(GAME_WIDTH, GAME_HEIGHT, Phaser.AUTO, GAME_CONTAINER_ID, { preload, create, update });
