@@ -5,8 +5,11 @@
  	const GFX = 'gfx';
  	const INITIAL_MOVESPEED = 4;
  	const PLAYER_BULLET_SPEED = 6;
+ 	const ENEMY_SPAWN_FREQ = 100;
+ 	const ENEMY_SPEED = 4.5;
 
  	let player;
+ 	let enemies;
  	let cursors;
 
  	const preload = _ => {
@@ -14,7 +17,6 @@
  	};
 
  	const handlePlayerFire = _ => {
- 		console.log('fire');
  		playerBullets.add( game.add.sprite(player.x, player.y, GFX, 7));
  	}
 
@@ -26,6 +28,7 @@
  		player = game.add.sprite(100, 100, GFX, 8);
  		player.moveSpeed = INITIAL_MOVESPEED;
  		playerBullets = game.add.group();
+ 		enemies = game.add.group();
  	};
 
  	const handlePlayerMovement = _ => {
@@ -59,9 +62,30 @@
  		playerBullets.children.forEach( bullet => bullet.y -= PLAYER_BULLET_SPEED );
  	}
 
+ 	const randomlySpawnEnemy = _ => {
+ 		if( Math.floor(Math.random() * ENEMY_SPAWN_FREQ ) === 0 ) {
+ 			let randomX = Math.floor( Math.random() * GAME_WIDTH );
+ 			enemies.add( game.add.sprite(randomX, -24, GFX, 0) );
+ 		}
+ 	}
+
+ 	const handleEnemyActions = _ => {
+		enemies.children.forEach( enemy => enemy.y += ENEMY_SPEED );
+	};
+
+ 	const cleanup = _ => {
+ 		playerBullets.children
+ 			.filter( bullet => bullet.y < 0 )
+ 			.forEach( bullet => bullet.destroy() );
+ 	}
+
  	const update = _ => { // runs 60 frames per second
  		handlePlayerMovement();
  		handleBulletAnimations();
+ 		randomlySpawnEnemy();
+ 		handleEnemyActions();
+
+ 		cleanup();
  	};
 
  	//															v---- WebGL (better) or Canvas (fallback)
