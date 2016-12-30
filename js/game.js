@@ -12,8 +12,15 @@
  		game.load.spritesheet(GFX, 'assets/shmup-spritesheet-140x56-28x28-tile.png', 28, 28);
  	};
 
+ 	const handlePlayerFire = _ => {
+ 		console.log('fire');
+ 		playerBullets.add( game.add.sprite(player.x, player.y, GFX, 7));
+ 	}
+
  	const create = _ => {
  		cursors = game.input.keyboard.createCursorKeys();
+ 		cursors.fire = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
+ 		cursors.fire.onUp.add( handlePlayerFire );
  		//				      x---v    v---y    v------ 8th cell
  		player = game.add.sprite(100, 100, GFX, 8);
  		player.moveSpeed = INITIAL_MOVESPEED;
