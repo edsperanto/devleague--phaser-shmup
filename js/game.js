@@ -4,6 +4,7 @@
  	const GAME_CONTAINER_ID = 'game';
  	const GFX = 'gfx';
  	const INITIAL_MOVESPEED = 4;
+ 	const PLAYER_BULLET_SPEED = 6;
 
  	let player;
  	let cursors;
@@ -54,8 +55,13 @@
  		}
  	}
 
+ 	const handleBulletAnimations = _ => {
+ 		playerBullets.children.forEach( bullet => bullet.y -= PLAYER_BULLET_SPEED );
+ 	}
+
  	const update = _ => { // runs 60 frames per second
  		handlePlayerMovement();
+ 		handleBulletAnimations();
  	};
 
  	//															v---- WebGL (better) or Canvas (fallback)
