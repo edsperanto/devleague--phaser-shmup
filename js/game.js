@@ -73,6 +73,25 @@
 		enemies.children.forEach( enemy => enemy.y += ENEMY_SPEED );
 	};
 
+	const removeBullet = bullet => bullet.destroy();
+
+	const destroyEnemy = enemy => enemy.kill();
+
+	const handleCollisions = _ => {
+		// check if any bullets touch any enemies
+		let enemiesHit = enemies.children
+			.filter( enemy => enemy.alive )
+			.filter( enemy => enemy.overlap(playerBullets) );
+
+		if( enemiesHit.length > 0 ){
+			// clean up bullets that land
+			playerBullets.children
+				.filter( bullet => bullet.overlap(enemies) )
+        		.forEach( removeBullet );
+			enemiesHit.forEach( destroyEnemy );
+		}
+	};
+
  	const cleanup = _ => {
  		playerBullets.children
  			.filter( bullet => bullet.y < 0 )
@@ -83,6 +102,7 @@
  		handlePlayerMovement();
  		handleBulletAnimations();
  		randomlySpawnEnemy();
+ 		handleCollisions();
  		handleEnemyActions();
 
  		cleanup();
