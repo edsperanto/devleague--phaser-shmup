@@ -147,6 +147,12 @@
  		playerBullets.children
  			.filter( bullet => bullet.y < 0 )
  			.forEach( bullet => bullet.destroy() );
+ 		enemyBullets.children
+			.filter( bullet => !bullet.alive )
+			.forEach( bullet => bullet.destroy() );
+		enemyBullets.children
+			.filter( bullet => !bullet.alive )
+			.forEach( bullet => bullet.destroy() );
  	}
 
  	const update = _ => { // runs 60 frames per second
