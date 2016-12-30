@@ -77,17 +77,33 @@
 
 	const destroyEnemy = enemy => enemy.kill();
 
+	const gameOver = _ => {
+		game.state.destroy();
+		game.add.text(90, 200, 'YOUR HEAD ASPLODE', { fill: '#FFFFFF' });
+	}
+
+	const handlePlayerHit = _ => {
+		gameOver();
+	}
+
 	const handleCollisions = _ => {
 		// check if any bullets touch any enemies
 		let enemiesHit = enemies.children
 			.filter( enemy => enemy.alive )
 			.filter( enemy => enemy.overlap(playerBullets) );
-
 		if( enemiesHit.length > 0 ){
 			// clean up bullets that land
 			playerBullets.children
 				.filter( bullet => bullet.overlap(enemies) )
         		.forEach( removeBullet );
+			enemiesHit.forEach( destroyEnemy );
+		}
+
+		// check if enemies hit the player
+		enemiesHit = enemies.children
+			.filter( enemy => enemy.overlap(player) );
+		if( enemiesHit.length > 0 ){
+				handlePlayerHit();
 			enemiesHit.forEach( destroyEnemy );
 		}
 	};
